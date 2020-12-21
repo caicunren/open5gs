@@ -119,7 +119,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
         }
     }
 
-    /* Update authroized session-AMBR */
+    /* Update authorized session-AMBR */
     if (SmPolicyDecision->sess_rules) {
         OpenAPI_map_t *SessRuleMap = NULL;
         OpenAPI_session_rule_t *SessionRule = NULL;
