@@ -197,7 +197,6 @@ bool pcf_nudr_dr_handle_query_sm_data(
 
         OpenAPI_ambr_t AuthSessAmbr;
         OpenAPI_authorized_default_qos_t AuthDefQos;
-        OpenAPI_arp_t Arp;
 
         OpenAPI_list_t *PccRuleList = NULL;
         OpenAPI_map_t *PccRuleMap = NULL;
@@ -296,23 +295,28 @@ bool pcf_nudr_dr_handle_query_sm_data(
         if (sess->subscribed_default_qos) {
             bool triggered = false;
 
-            memset(&Arp, 0, sizeof(Arp));
-            if (pdn->qos.arp.pre_emption_capability ==
-                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
-                Arp.preempt_cap = OpenAPI_preemption_capability_MAY_PREEMPT;
-            else
-                Arp.preempt_cap = OpenAPI_preemption_capability_NOT_PREEMPT;
-            if (pdn->qos.arp.pre_emption_vulnerability ==
-                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
-                Arp.preempt_vuln = OpenAPI_preemption_vulnerability_PREEMPTABLE;
-            else
-                Arp.preempt_vuln = OpenAPI_preemption_vulnerability_NOT_PREEMPTABLE;
-            Arp.priority_level = pdn->qos.arp.priority_level;
-
             memset(&AuthDefQos, 0, sizeof(AuthDefQos));
-            AuthDefQos.arp = &Arp;
+            AuthDefQos.arp = ogs_calloc(1, sizeof(OpenAPI_arp_t));
+            ogs_assert(AuthDefQos.arp);
+
             AuthDefQos._5qi = pdn->qos.qci;
             AuthDefQos.priority_level = pdn->qos.arp.priority_level;
+
+            if (pdn->qos.arp.pre_emption_capability ==
+                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
+                AuthDefQos.arp->preempt_cap =
+                    OpenAPI_preemption_capability_MAY_PREEMPT;
+            else
+                AuthDefQos.arp->preempt_cap =
+                    OpenAPI_preemption_capability_NOT_PREEMPT;
+            if (pdn->qos.arp.pre_emption_vulnerability ==
+                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
+                AuthDefQos.arp->preempt_vuln =
+                    OpenAPI_preemption_vulnerability_PREEMPTABLE;
+            else
+                AuthDefQos.arp->preempt_vuln =
+                    OpenAPI_preemption_vulnerability_NOT_PREEMPTABLE;
+            AuthDefQos.arp->priority_level = pdn->qos.arp.priority_level;
 
             SessionRule->auth_def_qos = &AuthDefQos;
 
@@ -323,13 +327,13 @@ bool pcf_nudr_dr_handle_query_sm_data(
                 triggered = true;
             if (sess->subscribed_default_qos->arp) {
                 if (sess->subscribed_default_qos->arp->priority_level !=
-                        Arp.priority_level)
+                        AuthDefQos.arp->priority_level)
                     triggered = true;
                 if (sess->subscribed_default_qos->arp->preempt_cap !=
-                        Arp.preempt_cap)
+                        AuthDefQos.arp->preempt_cap)
                     triggered = true;
                 if (sess->subscribed_default_qos->arp->preempt_vuln !=
-                        Arp.preempt_vuln)
+                        AuthDefQos.arp->preempt_vuln)
                     triggered = true;
 
             }
@@ -410,6 +414,10 @@ bool pcf_nudr_dr_handle_query_sm_data(
             QosData = ogs_calloc(1, sizeof(*QosData));
             ogs_assert(QosData);
 
+            /*
+             * At this point, only 1 QoSData is used for PccRule
+             * Therefore, QoS ID is derived from PCC Rule ID.
+             */
             QosData->qos_id = pcc_rule->id;
 
             QosDecisionMap = OpenAPI_map_create(QosData->qos_id, QosData);
@@ -461,6 +469,10 @@ bool pcf_nudr_dr_handle_query_sm_data(
                             ogs_free(SessionRule->auth_sess_ambr->uplink);
                         if (SessionRule->auth_sess_ambr->downlink)
                             ogs_free(SessionRule->auth_sess_ambr->downlink);
+                    }
+                    if (SessionRule->auth_def_qos) {
+                        ogs_free(SessionRule->auth_def_qos->arp);
+
                     }
                     ogs_free(SessionRule);
                 }
