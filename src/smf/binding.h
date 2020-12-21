@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SMF_BEARER_BINDING_H
-#define SMF_BEARER_BINDING_H
+#ifndef SMF_BINDING_H
+#define SMF_BINDING_H
 
 #include "context.h"
 
@@ -33,4 +33,4 @@ void smf_gtp_send_create_bearer_request(smf_bearer_t *bearer);
 }
 #endif
 
-#endif /* SMF_BEARER_BINDING_H */
+#endif /* SMF_BINDING_H */

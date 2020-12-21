@@ -21,7 +21,7 @@
 #include "gtp-path.h"
 #include "pfcp-path.h"
 #include "gx-handler.h"
-#include "bearer-binding.h"
+#include "binding.h"
 
 static uint8_t gtp_cause_from_diameter(
         const uint32_t *dia_err, const uint32_t *dia_exp_err)

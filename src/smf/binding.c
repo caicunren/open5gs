@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bearer-binding.h"
+#include "binding.h"
 #include "s5c-build.h"
 #include "pfcp-path.h"
 

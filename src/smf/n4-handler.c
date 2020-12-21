@@ -22,7 +22,7 @@
 #include "pfcp-path.h"
 #include "gtp-path.h"
 #include "n4-handler.h"
-#include "bearer-binding.h"
+#include "binding.h"
 #include "sbi-path.h"
 
 static uint8_t gtp_cause_from_pfcp(uint8_t pfcp_cause)
