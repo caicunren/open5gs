@@ -370,8 +370,21 @@ bool pcf_nudr_dr_handle_query_sm_data(
 
             PccRule = ogs_calloc(1, sizeof(*PccRule));
             ogs_assert(PccRule);
+            QosData = ogs_calloc(1, sizeof(*QosData));
+            ogs_assert(QosData);
 
+            /*
+             * At this point, only 1 QosData is used for PccRule.
+             * Therefore, QoS ID uses the same value as PCC Rule ID.
+             */
             PccRule->pcc_rule_id = pcc_rule->id;
+            QosData->qos_id = pcc_rule->id;
+
+            PccRule->ref_qos_data = OpenAPI_list_create();
+            ogs_assert(PccRule->ref_qos_data);
+
+            OpenAPI_list_add(PccRule->ref_qos_data, QosData->qos_id);
+
             PccRule->precedence = pcc_rule->precedence;
 
             FlowInformationList = OpenAPI_list_create();
@@ -410,15 +423,6 @@ bool pcf_nudr_dr_handle_query_sm_data(
             ogs_assert(PccRuleMap);
 
             OpenAPI_list_add(PccRuleList, PccRuleMap);
-
-            QosData = ogs_calloc(1, sizeof(*QosData));
-            ogs_assert(QosData);
-
-            /*
-             * At this point, only 1 QoSData is used for PccRule
-             * Therefore, QoS ID is derived from PCC Rule ID.
-             */
-            QosData->qos_id = pcc_rule->id;
 
             QosData->_5qi = pcc_rule->qos.qci;
             QosData->priority_level = pcc_rule->qos.arp.priority_level;
@@ -522,12 +526,12 @@ bool pcf_nudr_dr_handle_query_sm_data(
             if (PccRuleMap) {
                 PccRule = PccRuleMap->value;
                 if (PccRule) {
+                    if (PccRule->ref_qos_data)
+                        OpenAPI_list_free(PccRule->ref_qos_data);
                     if (PccRule->flow_infos) {
                         OpenAPI_list_for_each(PccRule->flow_infos, node2) {
                             FlowInformation = node2->data;
-                            if (FlowInformation) {
-                                ogs_free(FlowInformation);
-                            }
+                            if (FlowInformation) ogs_free(FlowInformation);
                         }
                         OpenAPI_list_free(PccRule->flow_infos);
                     }
