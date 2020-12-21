@@ -246,6 +246,9 @@ typedef struct smf_sess_s {
     ogs_s_nssai_t   s_nssai;
     char            *dnn;
 
+    /* PCF ID */
+    char            *pcf_id;
+
     /* Integrity protection maximum data rate */
     struct {
         uint8_t mbr_dl;

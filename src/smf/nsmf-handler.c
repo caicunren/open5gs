@@ -188,6 +188,11 @@ bool smf_nsmf_handle_create_sm_context(
         sess->dnn = ogs_strdup(SmContextCreateData->dnn);
     }
 
+    if (SmContextCreateData->pcf_id) {
+        if (sess->pcf_id) ogs_free(sess->pcf_id);
+        sess->pcf_id = ogs_strdup(SmContextCreateData->pcf_id);
+    }
+
     /*
      * NOTE : The pkbuf created in the SBI message will be removed
      *        from ogs_sbi_message_free().
