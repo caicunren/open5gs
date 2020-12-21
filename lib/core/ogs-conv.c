@@ -215,12 +215,16 @@ uint64_t ogs_uint64_from_string(char *str)
 
     ogs_assert(str);
 
+    if (strlen(str) == 0)
+        return 0;
+
     errno = 0;
     x = strtoll(str, NULL, 16);
 
     if ((errno == ERANGE && (x == LONG_MAX || x == LONG_MIN)) ||
             (errno != 0 && x == 0)) {
-        ogs_fatal("strtoll() failed [%lld:%d]", (long long)x, errno);
+        ogs_log_message(OGS_LOG_FATAL, ogs_errno, "strtoll()) failed [%lld]",
+                (long long)x);
         ogs_assert_if_reached();
     }
 
