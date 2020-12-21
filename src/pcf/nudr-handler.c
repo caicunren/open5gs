@@ -420,6 +420,42 @@ bool pcf_nudr_dr_handle_query_sm_data(
              */
             QosData->qos_id = pcc_rule->id;
 
+            QosData->_5qi = pcc_rule->qos.qci;
+            QosData->priority_level = pcc_rule->qos.arp.priority_level;
+
+            QosData->arp = ogs_calloc(1, sizeof(OpenAPI_arp_t));
+            ogs_assert(QosData->arp);
+
+            if (pcc_rule->qos.arp.pre_emption_capability ==
+                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
+                QosData->arp->preempt_cap =
+                    OpenAPI_preemption_capability_MAY_PREEMPT;
+            else
+                QosData->arp->preempt_cap =
+                    OpenAPI_preemption_capability_NOT_PREEMPT;
+            if (pcc_rule->qos.arp.pre_emption_vulnerability ==
+                    OGS_PDN_PRE_EMPTION_CAPABILITY_ENABLED)
+                QosData->arp->preempt_vuln =
+                    OpenAPI_preemption_vulnerability_PREEMPTABLE;
+            else
+                QosData->arp->preempt_vuln =
+                    OpenAPI_preemption_vulnerability_NOT_PREEMPTABLE;
+            QosData->arp->priority_level = pcc_rule->qos.arp.priority_level;
+
+            if (pcc_rule->qos.mbr.uplink)
+                QosData->maxbr_ul = ogs_sbi_bitrate_to_string(
+                        pcc_rule->qos.mbr.uplink, OGS_SBI_BITRATE_KBPS);
+            if (pcc_rule->qos.mbr.downlink)
+                QosData->maxbr_dl = ogs_sbi_bitrate_to_string(
+                        pcc_rule->qos.mbr.downlink, OGS_SBI_BITRATE_KBPS);
+
+            if (pcc_rule->qos.gbr.uplink)
+                QosData->gbr_ul = ogs_sbi_bitrate_to_string(
+                        pcc_rule->qos.gbr.uplink, OGS_SBI_BITRATE_KBPS);
+            if (pcc_rule->qos.gbr.downlink)
+                QosData->gbr_dl = ogs_sbi_bitrate_to_string(
+                        pcc_rule->qos.gbr.downlink, OGS_SBI_BITRATE_KBPS);
+
             QosDecisionMap = OpenAPI_map_create(QosData->qos_id, QosData);
             ogs_assert(QosDecisionMap);
 
@@ -507,6 +543,12 @@ bool pcf_nudr_dr_handle_query_sm_data(
             if (QosDecisionMap) {
                 QosData = QosDecisionMap->value;
                 if (QosData) {
+                    if (QosData->arp) ogs_free(QosData->arp);
+                    if (QosData->maxbr_ul) ogs_free(QosData->maxbr_ul);
+                    if (QosData->maxbr_dl) ogs_free(QosData->maxbr_dl);
+                    if (QosData->gbr_ul) ogs_free(QosData->gbr_ul);
+                    if (QosData->gbr_dl) ogs_free(QosData->gbr_dl);
+
                     ogs_free(QosData);
                 }
                 ogs_free(QosDecisionMap);
