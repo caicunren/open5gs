@@ -204,6 +204,10 @@ bool pcf_nudr_dr_handle_query_sm_data(
         OpenAPI_pcc_rule_t *PccRule = NULL;
         OpenAPI_flow_information_t *FlowInformation = NULL;
 
+        OpenAPI_list_t *QosDecisionList = NULL;
+        OpenAPI_map_t *QosDecisionMap = NULL;
+        OpenAPI_qos_data_t *QosData = NULL;
+
         OpenAPI_list_t *PolicyCtrlReqTriggers = NULL;
 
         if (!recvmsg->SmPolicyData) {
@@ -336,9 +340,6 @@ bool pcf_nudr_dr_handle_query_sm_data(
 
         }
 
-        if (PolicyCtrlReqTriggers->count)
-            SmPolicyDecision.policy_ctrl_req_triggers = PolicyCtrlReqTriggers;
-
         SessRuleMap = OpenAPI_map_create(
                 SessionRule->sess_rule_id, SessionRule);
         ogs_assert(SessRuleMap);
@@ -349,10 +350,13 @@ bool pcf_nudr_dr_handle_query_sm_data(
             SmPolicyDecision.sess_rules = SessRuleList;
 
         /**************************************************************
-         * PCC Rule
+         * PCC Rule & QoS Decision
          *************************************************************/
         PccRuleList = OpenAPI_list_create();
         ogs_assert(PccRuleList);
+
+        QosDecisionList = OpenAPI_list_create();
+        ogs_assert(QosDecisionList);
 
         for (i = 0; i < session_data.num_of_pcc_rule; i++) {
             OpenAPI_list_t *FlowInformationList = NULL;
@@ -402,11 +406,29 @@ bool pcf_nudr_dr_handle_query_sm_data(
             ogs_assert(PccRuleMap);
 
             OpenAPI_list_add(PccRuleList, PccRuleMap);
+
+            QosData = ogs_calloc(1, sizeof(*QosData));
+            ogs_assert(QosData);
+
+            QosData->qos_id = pcc_rule->id;
+
+            QosDecisionMap = OpenAPI_map_create(QosData->qos_id, QosData);
+            ogs_assert(QosDecisionMap);
+
+            OpenAPI_list_add(QosDecisionList, QosDecisionMap);
         }
 
         if (PccRuleList->count)
             SmPolicyDecision.pcc_rules = PccRuleList;
 
+        if (QosDecisionList->count)
+            SmPolicyDecision.qos_decs = QosDecisionList;
+
+        /* Policy Control Request Triggers */
+        if (PolicyCtrlReqTriggers->count)
+            SmPolicyDecision.policy_ctrl_req_triggers = PolicyCtrlReqTriggers;
+
+        /* Supported Features */
         if (sess->smpolicycontrol_features) {
             SmPolicyDecision.supp_feat =
                 ogs_uint64_to_string(sess->smpolicycontrol_features);
@@ -467,6 +489,18 @@ bool pcf_nudr_dr_handle_query_sm_data(
             }
         }
         OpenAPI_list_free(PccRuleList);
+
+        OpenAPI_list_for_each(QosDecisionList, node) {
+            QosDecisionMap = node->data;
+            if (QosDecisionMap) {
+                QosData = QosDecisionMap->value;
+                if (QosData) {
+                    ogs_free(QosData);
+                }
+                ogs_free(QosDecisionMap);
+            }
+        }
+        OpenAPI_list_free(QosDecisionList);
 
         OpenAPI_list_free(PolicyCtrlReqTriggers);
 
