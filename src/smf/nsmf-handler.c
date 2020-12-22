@@ -154,6 +154,9 @@ bool smf_nsmf_handle_create_sm_context(
     }
 
     ogs_sbi_parse_plmn_id_nid(&sess->plmn_id, servingNetwork);
+
+    sess->rat_type = SmContextCreateData->rat_type;
+
     ogs_sbi_parse_nr_location(&sess->nr_tai, &sess->nr_cgi, NrLocation);
     if (NrLocation->ue_location_timestamp)
         ogs_sbi_time_from_string(&sess->ue_location_timestamp,

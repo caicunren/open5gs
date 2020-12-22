@@ -65,6 +65,7 @@ ogs_sbi_request_t *amf_nsmf_pdu_session_build_create_sm_context(
         }
     }
     SmContextCreateData.pdu_session_id = sess->psi;
+    ogs_assert(sess->dnn);
     SmContextCreateData.dnn = sess->dnn;
 
     memset(&sNssai, 0, sizeof(sNssai));
@@ -98,6 +99,8 @@ ogs_sbi_request_t *amf_nsmf_pdu_session_build_create_sm_context(
 
     n1SmMsg.content_id = (char *)OGS_SBI_CONTENT_5GNAS_SM_ID;
     SmContextCreateData.n1_sm_msg = &n1SmMsg;
+
+    SmContextCreateData.rat_type = amf_ue_rat_type(amf_ue);
 
     memset(&ueLocation, 0, sizeof(ueLocation));
     ueLocation.nr_location = ogs_sbi_build_nr_location(
