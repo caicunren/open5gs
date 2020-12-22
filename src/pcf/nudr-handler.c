@@ -404,7 +404,7 @@ bool pcf_nudr_dr_handle_query_sm_data(
                     FlowInformation->flow_direction =
                         OpenAPI_flow_direction_DOWNLINK;
                 else {
-                    ogs_fatal("Invalid direction [%d]", flow->direction);
+                    ogs_fatal("Unsupported direction [%d]", flow->direction);
                     ogs_assert_if_reached();
                 }
 
