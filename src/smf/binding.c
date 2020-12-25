@@ -520,10 +520,28 @@ void smf_qos_flow_binding(smf_sess_t *sess, ogs_sbi_stream_t *stream)
                 ogs_assert(qos_flow);
 
                 /* Precedence is set to the order in which it was created */
-                ogs_assert(qos_flow->dl_pdr);
-                ogs_assert(qos_flow->ul_pdr);
-                qos_flow->dl_pdr->precedence = qos_flow->dl_pdr->id;
-                qos_flow->ul_pdr->precedence = qos_flow->ul_pdr->id;
+                dl_pdr = qos_flow->dl_pdr;
+                ogs_assert(dl_pdr);
+                ul_pdr = qos_flow->ul_pdr;
+                ogs_assert(ul_pdr);
+
+                dl_pdr->precedence = dl_pdr->id;
+                ul_pdr->precedence = ul_pdr->id;
+
+                /* Set UPF-N3 TEID & ADDR to the UL PDR */
+                ogs_assert(sess->pfcp_node);
+                if (sess->pfcp_node->up_function_features.ftup) {
+                    ul_pdr->f_teid.ch = 1;
+                    ul_pdr->f_teid.chid = 1;
+                    ul_pdr->f_teid.choose_id = OGS_PFCP_DEFAULT_CHOOSE_ID;
+                    ul_pdr->f_teid_len = 2;
+                } else {
+                    ogs_assert(sess->upf_n3_addr || sess->upf_n3_addr6);
+                    ogs_pfcp_sockaddr_to_f_teid(
+                            sess->upf_n3_addr, sess->upf_n3_addr6,
+                            &ul_pdr->f_teid, &ul_pdr->f_teid_len);
+                    ul_pdr->f_teid.teid = sess->upf_n3_teid;
+                }
 
                 qos_flow->pcc_rule.id = ogs_strdup(pcc_rule->id);
                 ogs_assert(qos_flow->pcc_rule.id);

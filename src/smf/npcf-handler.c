@@ -384,9 +384,12 @@ bool smf_npcf_smpolicycontrol_handle_create(
         sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "");
 
     /* Set UPF-N3 TEID & ADDR to the Default UL PDR */
+    ogs_assert(sess->pfcp_node);
     if (sess->pfcp_node->up_function_features.ftup) {
         ul_pdr->f_teid.ch = 1;
-        ul_pdr->f_teid_len = 1;
+        ul_pdr->f_teid.chid = 1;
+        ul_pdr->f_teid.choose_id = OGS_PFCP_DEFAULT_CHOOSE_ID;
+        ul_pdr->f_teid_len = 2;
     } else {
         resource = ogs_pfcp_gtpu_resource_find(
                 &sess->pfcp_node->gtpu_resource_list,
