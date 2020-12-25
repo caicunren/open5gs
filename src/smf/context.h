@@ -171,7 +171,10 @@ typedef struct smf_bearer_s {
     uint32_t        sgw_s5u_teid;   /* SGW-S5U TEID */
     ogs_ip_t        sgw_s5u_ip;     /* SGW-S5U IPv4/IPv6 */
 
-    char            *name;          /* PCC Rule Name */
+    struct {
+        char            *name;      /* EPC: PCC Rule Name */
+        char            *id;        /* 5GC: PCC Rule Id */
+    } pcc_rule;
     ogs_qos_t       qos;            /* QoS Infomration */
 
     OGS_POOL(pf_identifier_pool, uint8_t);
@@ -334,6 +337,8 @@ smf_sess_t *smf_sess_cycle(smf_sess_t *sess);
 
 smf_bearer_t *smf_qos_flow_add(smf_sess_t *sess);
 smf_bearer_t *smf_qos_flow_find_by_qfi(smf_sess_t *sess, uint8_t qfi);
+smf_bearer_t *smf_qos_flow_find_by_pcc_rule_id(
+        smf_sess_t *sess, char *pcc_rule_id);
 
 smf_bearer_t *smf_bearer_add(smf_sess_t *sess);
 int smf_bearer_remove(smf_bearer_t *bearer);
@@ -342,7 +347,8 @@ smf_bearer_t *smf_bearer_find(uint32_t index);
 smf_bearer_t *smf_bearer_find_by_pgw_s5u_teid(
         smf_sess_t *sess, uint32_t pgw_s5u_teid);
 smf_bearer_t *smf_bearer_find_by_ebi(smf_sess_t *sess, uint8_t ebi);
-smf_bearer_t *smf_bearer_find_by_name(smf_sess_t *sess, char *name);
+smf_bearer_t *smf_bearer_find_by_pcc_rule_name(
+        smf_sess_t *sess, char *pcc_rule_name);
 smf_bearer_t *smf_bearer_find_by_qci_arp(smf_sess_t *sess, 
                                 uint8_t qci,
                                 uint8_t priority_level,

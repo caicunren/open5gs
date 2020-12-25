@@ -190,9 +190,7 @@ void smf_5gc_n4_handle_session_establishment_response(
     smf_sbi_discover_and_send(OpenAPI_nf_type_AMF, sess, stream, NULL,
             smf_namf_comm_build_n1_n2_message_transfer);
 
-#if 0
-    smf_bearer_binding(sess);
-#endif
+    smf_qos_flow_binding(sess, stream);
 }
 
 void smf_5gc_n4_handle_session_modification_response(
@@ -293,6 +291,8 @@ void smf_5gc_n4_handle_session_modification_response(
         /* Only ACTIVING & DEACTIVATED is Included */
         smf_sbi_send_sm_context_updated_data(
                 sess, stream, OpenAPI_up_cnx_state_DEACTIVATED);
+    } else if (flags & OGS_PFCP_MODIFY_CREATE) {
+        ogs_fatal("TODO: Create QoS Flow");
     }
 }
 

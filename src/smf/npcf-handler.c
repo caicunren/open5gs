@@ -260,6 +260,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
                 continue;
             }
 
+            pcc_rule->type = OGS_PCC_RULE_TYPE_INSTALL;
             pcc_rule->id = ogs_strdup(PccRule->pcc_rule_id);
             pcc_rule->precedence = PccRule->precedence;
 
